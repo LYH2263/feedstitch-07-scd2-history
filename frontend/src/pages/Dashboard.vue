@@ -20,7 +20,9 @@ onMounted(async () => {
     <p v-if="err" class="tag danger">{{ err }}</p>
     <div class="tiles" v-if="stats">
       <div class="tile"><div class="hero-num">{{ stats.source_count }}</div><div class="muted">源</div></div>
-      <div class="tile"><div class="hero-num">{{ stats.canonical_count }}</div><div class="muted">Canonical</div></div>
+      <div class="tile"><div class="hero-num">{{ stats.canonical_count }}</div><div class="muted">Canonical 当前行</div></div>
+      <div class="tile"><div class="hero-num">{{ stats.current_version_count }}</div><div class="muted">开放版本（valid_to 为空）</div></div>
+      <div class="tile"><div class="hero-num">{{ stats.history_version_total }}</div><div class="muted">历史版本累计</div></div>
       <div class="tile"><div class="hero-num">{{ stats.conflict_count }}</div><div class="muted">冲突</div></div>
       <div class="tile"><div class="hero-num">{{ stats.run_count }}</div><div class="muted">Runs</div></div>
       <div class="tile"><div class="hero-num">{{ stats.staging_count }}</div><div class="muted">Staging</div></div>

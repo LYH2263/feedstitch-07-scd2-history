@@ -4,7 +4,12 @@ from pathlib import Path
 import pytest
 
 from app.config import FIXTURES_DIR
-from app.engines.merge_rules import decide_merge, eligible_for_incremental, fields_conflict
+from app.engines.merge_rules import (
+    can_version_key,
+    decide_merge,
+    eligible_for_incremental,
+    fields_conflict,
+)
 from app.engines.parse_feed import parse_fixture
 
 
@@ -82,3 +87,36 @@ def test_parse_missing_field_raises(tmp_path: Path):
     p.write_text(json.dumps([{"business_key": "x"}]), encoding="utf-8")
     with pytest.raises(ValueError):
         parse_fixture(p, "json")
+
+
+def test_divergence_is_conflict_without_versioning_right():
+    a = {"title": "Oak Desk Lamp", "price": 129.0, "category": "lighting", "source_revision": 3}
+    b = {
+        "title": "Oak Desk Lamp Pro",
+        "price": 139.0,
+        "category": "lighting",
+        "source_revision": 5,
+    }
+    incoming = {**b, "business_key": "SKU-1001", "event_ts": "t", "payload": {}}
+    assert decide_merge(a, incoming, versioning_allowed=False) == "conflict"
+
+
+def test_divergence_opens_version_when_allowed():
+    a = {"title": "Oak Desk Lamp", "price": 129.0, "category": "lighting", "source_revision": 3}
+    b = {
+        "title": "Oak Desk Lamp Pro",
+        "price": 139.0,
+        "category": "lighting",
+        "source_revision": 5,
+    }
+    incoming = {**b, "business_key": "SKU-1001", "event_ts": "t", "payload": {}}
+    assert decide_merge(a, incoming, versioning_allowed=True) == "version_update"
+
+
+def test_authority_gate_same_source_and_group():
+    existing = {"source_id": 1}
+    assert can_version_key(existing, 1, None) is True
+    assert can_version_key(existing, 2, "alpha", existing_authority_group="alpha") is True
+    assert can_version_key(existing, 2, "alpha", existing_authority_group="beta") is False
+    assert can_version_key(existing, 2, None, existing_authority_group="alpha") is False
+    assert can_version_key(None, 9, "anything") is True

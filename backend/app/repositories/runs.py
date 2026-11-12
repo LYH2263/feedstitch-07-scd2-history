@@ -181,3 +181,28 @@ def list_conflicts(conn: sqlite3.Connection) -> list[dict[str, Any]]:
         d["incoming"] = json.loads(d.pop("incoming_payload"))
         out.append(d)
     return out
+
+
+def staging_disposition_counts(
+    conn: sqlite3.Connection,
+    run_id: int | None = None,
+) -> dict[str, int]:
+    if run_id is None:
+        rows = conn.execute(
+            "SELECT disposition, COUNT(*) AS c FROM staging_rows GROUP BY disposition"
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT disposition, COUNT(*) AS c FROM staging_rows WHERE run_id = ? GROUP BY disposition",
+            (run_id,),
+        ).fetchall()
+    return {r["disposition"]: int(r["c"]) for r in rows}
+
+
+def conflicts_for_run(conn: sqlite3.Connection, run_id: int) -> int:
+    return int(
+        conn.execute(
+            "SELECT COUNT(*) AS c FROM conflicts WHERE run_id = ?",
+            (run_id,),
+        ).fetchone()["c"]
+    )

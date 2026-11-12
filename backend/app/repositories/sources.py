@@ -7,7 +7,8 @@ from typing import Any
 def list_sources(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     rows = conn.execute(
         """
-        SELECT id, name, format, fixture_path, watermark_ts, lookback_seconds, enabled, note
+        SELECT id, name, format, fixture_path, watermark_ts, lookback_seconds,
+               enabled, note, authority_group
         FROM sources ORDER BY id
         """
     ).fetchall()
@@ -17,12 +18,21 @@ def list_sources(conn: sqlite3.Connection) -> list[dict[str, Any]]:
 def get_source(conn: sqlite3.Connection, source_id: int) -> dict[str, Any] | None:
     row = conn.execute(
         """
-        SELECT id, name, format, fixture_path, watermark_ts, lookback_seconds, enabled, note
+        SELECT id, name, format, fixture_path, watermark_ts, lookback_seconds,
+               enabled, note, authority_group
         FROM sources WHERE id = ?
         """,
         (source_id,),
     ).fetchone()
     return dict(row) if row else None
+
+
+def get_authority_group(conn: sqlite3.Connection, source_id: int) -> str | None:
+    row = conn.execute(
+        "SELECT authority_group FROM sources WHERE id = ?",
+        (source_id,),
+    ).fetchone()
+    return row["authority_group"] if row else None
 
 
 def set_watermark(conn: sqlite3.Connection, source_id: int, watermark_ts: str | None) -> None:

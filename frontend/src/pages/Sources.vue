@@ -20,7 +20,7 @@ onMounted(async () => {
       <table>
         <thead>
           <tr>
-            <th>ID</th><th>名称</th><th>格式</th><th>夹具</th><th>水位线</th><th>lookback</th><th>说明</th>
+            <th>ID</th><th>名称</th><th>格式</th><th>夹具</th><th>水位线</th><th>lookback</th><th>authority_group</th><th>说明</th>
           </tr>
         </thead>
         <tbody>
@@ -31,6 +31,7 @@ onMounted(async () => {
             <td class="mono">{{ s.fixture_path }}</td>
             <td class="mono">{{ s.watermark_ts || '—' }}</td>
             <td>{{ s.lookback_seconds }}s</td>
+            <td class="mono">{{ s.authority_group || '—' }}</td>
             <td class="muted">{{ s.note }}</td>
           </tr>
         </tbody>
